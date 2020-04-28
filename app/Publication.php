@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Publication extends Model
 {
-    protected $with = ['thesisType', 'publicationType', 'institution', 'habitatTypes', 'dataTypes', 'locations', 'people', 'species'];
+    protected $with = [
+        'thesisType', 'publicationType', 'institution', 'habitatTypes',
+        'dataTypes', 'locations', 'people', 'species', 'authors', 'supervisors'];
 
 
     public function publicationType()
@@ -52,5 +54,21 @@ class Publication extends Model
     public function species()
     {
         return $this->belongsToMany('App\Species');
+    }
+
+    public function authors()
+    {
+        return $this->people()
+            ->wherePivot('person_supervisor', null)
+            ->orWherePivot('person_supervisor', '')
+            ->orderBy('person_publication.person_order');
+    }
+
+    public function supervisors()
+    {
+        return $this->people()
+            ->wherePivot('person_supervisor', '!=', null)
+            ->orWherePivot('person_supervisor', '!=', '')
+            ->orderBy('person_publication.person_order');
     }
 }
